@@ -2,7 +2,9 @@
 import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue'
 import {PencilIcon, TrashIcon, EllipsisVerticalIcon} from '@heroicons/vue/20/solid'
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/vue'
+import {ref} from "vue";
 import PostUserHeader from "@/Components/app/PostUserHeader.vue";
+import { router } from '@inertiajs/vue3'
 const props = defineProps({
     post: Object
 })
@@ -11,8 +13,17 @@ function isImage(attachment) {
     const mime = attachment.mime.split('/')
     return mime[0].toLowerCase() === 'image'
 }
-function openEditModal(){
+
+function openEditModal() {
     emit('editClick', props.post)
+}
+
+function deletePost() {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+        router.delete(route('post.destroy', props.post), {
+            preserveScroll: true
+        })
+    }
 }
 </script>
 
@@ -25,14 +36,12 @@ function openEditModal(){
                     <MenuButton
                         class="w-8 h-8 rounded-full hover:bg-black/5 transition flex items-center justify-center"
                     >
-
                         <EllipsisVerticalIcon
                             class="w-5 h-5"
                             aria-hidden="true"
                         />
                     </MenuButton>
                 </div>
-
                 <transition
                     enter-active-class="transition duration-100 ease-out"
                     enter-from-class="transform scale-95 opacity-0"
@@ -62,6 +71,7 @@ function openEditModal(){
                             </MenuItem>
                             <MenuItem v-slot="{ active }">
                                 <button
+                                    @click="deletePost"
                                     :class="[
                   active ? 'bg-indigo-500 text-white' : 'text-gray-900',
                   'group flex w-full items-center rounded-md px-2 py-2 text-sm',
