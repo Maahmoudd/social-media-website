@@ -2,7 +2,6 @@
 import {Menu, MenuButton, MenuItems, MenuItem} from '@headlessui/vue'
 import {PencilIcon, TrashIcon, EllipsisVerticalIcon} from '@heroicons/vue/20/solid'
 import {Disclosure, DisclosureButton, DisclosurePanel} from '@headlessui/vue'
-import {ref} from "vue";
 import PostUserHeader from "@/Components/app/PostUserHeader.vue";
 import { router } from '@inertiajs/vue3'
 const props = defineProps({
@@ -13,12 +12,10 @@ function isImage(attachment) {
     const mime = attachment.mime.split('/')
     return mime[0].toLowerCase() === 'image'
 }
-
-function openEditModal() {
+function openEditModal(){
     emit('editClick', props.post)
 }
-
-function deletePost() {
+function deletePost(){
     if (window.confirm('Are you sure you want to delete this post?')) {
         router.delete(route('post.destroy', props.post), {
             preserveScroll: true
@@ -26,7 +23,6 @@ function deletePost() {
     }
 }
 </script>
-
 <template>
     <div class="bg-white border rounded p-4 mb-3">
         <div class="flex items-center justify-between mb-3">
@@ -91,10 +87,10 @@ function deletePost() {
         </div>
         <div class="mb-3">
             <Disclosure v-slot="{ open }">
-                <div v-if="!open" v-html="post.body.substring(0, 200)"/>
+                <div class="ck-content-output" v-if="!open" v-html="post.body.substring(0, 200)"/>
                 <template v-if="post.body.length > 200">
                     <DisclosurePanel>
-                        <div v-html="post.body"/>
+                        <div class="ck-content-output" v-html="post.body"/>
                     </DisclosurePanel>
                     <div class="flex justify-end">
                         <DisclosureButton class="text-blue-500 hover:underline">
