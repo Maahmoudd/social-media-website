@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -15,10 +17,17 @@ class HomeController extends Controller
             ->withCount('reactions')
             ->withCount('comments')
             ->with([
-                'comments' ,
+                'comments' => function ($query) use ($userId) {
+                    $query->withCount('reactions')
+                        ->with([
+                            'reactions' => function ($query) use ($userId) {
+                                $query->where('user_id', $userId);
+                            }
+                        ]);
+                },
                 'reactions' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])
+                    $query->where('user_id', $userId);
+                }])
             ->latest()
             ->paginate(20);
 
