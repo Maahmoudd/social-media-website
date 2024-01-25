@@ -13,34 +13,37 @@ Route::get('/u/{user:username}', [ProfileController::class, 'index'])
 
 Route::middleware('auth')
     ->group(function () {
-        Route::post('/profile/update-images', [ProfileController::class, 'updateImage'])
-            ->name('profile.updateImages');
-    //    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])
-            ->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])
-            ->name('profile.destroy');
+        Route::prefix('profile')->as('profile.')->group(function () {
+            Route::post('/update-images', [ProfileController::class, 'updateImage'])
+                ->name('updateImages');
+            Route::patch('/', [ProfileController::class, 'update'])
+                ->name('update');
+            Route::delete('/', [ProfileController::class, 'destroy'])
+                ->name('destroy');
+        });
 
-        Route::post('/posts', [PostController::class, 'store'])
-            ->name('post.create');
-        Route::put('/posts/{post}', [PostController::class, 'update'])
-            ->name('post.update');
-        Route::delete('/posts/{post}', [PostController::class, 'destroy'])
-            ->name('post.destroy');
-        Route::get('/post/download/{attachment}', [PostController::class, 'downloadAttachment'])
-            ->name('post.download');
-        Route::post('/post/{post}/reaction', [PostController::class, 'postReaction'])
-            ->name('post.reaction');
-        Route::post('/post/{post}/comment', [PostController::class, 'createComment'])
-            ->name('post.comment.create');
-        Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])
-            ->name('comment.delete');
-        Route::put('/comment/{comment}', [PostController::class, 'updateComment'])
-            ->name('comment.update');
-        Route::post('/comment/{comment}/reaction', [PostController::class, 'commentReaction'])
-            ->name('comment.reaction');
-
-
+        Route::prefix('posts')->as('post.')->group(function () {
+            Route::post('/', [PostController::class, 'store'])
+                ->name('create');
+            Route::put('/{post}', [PostController::class, 'update'])
+                ->name('update');
+            Route::delete('/{post}', [PostController::class, 'destroy'])
+                ->name('destroy');
+            Route::get('/download/{attachment}', [PostController::class, 'downloadAttachment'])
+                ->name('download');
+            Route::post('/{post}/reaction', [PostController::class, 'postReaction'])
+                ->name('reaction');
+            Route::post('/{post}/comment', [PostController::class, 'createComment'])
+                ->name('comment.create');
+        });
+        Route::prefix('comment')->as('comment.')->group(function () {
+            Route::delete('/{comment}', [PostController::class, 'deleteComment'])
+                ->name('delete');
+            Route::put('//{comment}', [PostController::class, 'updateComment'])
+                ->name('update');
+            Route::post('/{comment}/reaction', [PostController::class, 'commentReaction'])
+                ->name('reaction');
+        });
 });
 
 require __DIR__.'/auth.php';
