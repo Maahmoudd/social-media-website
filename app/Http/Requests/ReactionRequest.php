@@ -2,18 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Enums\ReactionEnum;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
-class UpdateCommentRequest extends FormRequest
+class ReactionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $comment = $this->route('comment');
-        return $comment->user_id == Auth::id();
+        return true;
     }
 
     /**
@@ -23,10 +23,8 @@ class UpdateCommentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isDeleting = $this->isMethod('delete');
-
         return [
-            'comment' => $isDeleting ? 'nullable' : 'required'
+            'reaction' => [Rule::enum(ReactionEnum::class)]
         ];
     }
 }

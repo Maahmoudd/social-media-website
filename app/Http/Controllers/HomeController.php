@@ -3,34 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PostResource;
-use App\Models\Post;
+use App\Http\Services\HomeService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
+
+    protected $homeService;
+
+    public function __construct(HomeService $homeService)
+    {
+        $this->homeService = $homeService;
+    }
+
     public function index(Request $request)
     {
-        $userId = Auth::id();
-        $posts = Post::query()
-            ->withCount('reactions')
-            ->withCount('comments')
-            ->with([
-                'comments' => function ($query) use ($userId) {
-                    $query->withCount('reactions')
-                        ->with([
-                            'reactions' => function ($query) use ($userId) {
-                                $query->where('user_id', $userId);
-                            }
-                        ]);
-                },
-                'reactions' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }])
-            ->latest()
-            ->paginate(20);
-
+        $posts = $this->homeService->index();
         return Inertia::render('Home', [
             'posts' => PostResource::collection($posts)
         ]);

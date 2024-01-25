@@ -3,17 +3,15 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
-class UpdateCommentRequest extends FormRequest
+class DeleteProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $comment = $this->route('comment');
-        return $comment->user_id == Auth::id();
+        return false;
     }
 
     /**
@@ -23,10 +21,8 @@ class UpdateCommentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isDeleting = $this->isMethod('delete');
-
         return [
-            'comment' => $isDeleting ? 'nullable' : 'required'
+            'password' => ['required', 'current_password']
         ];
     }
 }
