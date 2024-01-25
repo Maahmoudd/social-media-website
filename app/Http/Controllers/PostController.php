@@ -142,10 +142,7 @@ class PostController extends Controller
         ]);
 
         $userId = Auth::id();
-        $reaction = Reaction::where('user_id', $userId)
-            ->where('object_id', $post->id)
-            ->where('object_type', Post::class)
-            ->first();
+        $reaction = $post->reactions()->where('user_id', $userId)->first();
 
         if ($reaction) {
             $hasReaction = false;
@@ -160,7 +157,7 @@ class PostController extends Controller
             ]);
         }
 
-        $reactions = Reaction::where('object_id', $post->id)->where('object_type', Post::class)->count();
+        $reactions = $post->reactions()->count();
 
         return response([
             'num_of_reactions' => $reactions,
@@ -211,10 +208,7 @@ class PostController extends Controller
         ]);
 
         $userId = Auth::id();
-        $reaction = Reaction::where('user_id', $userId)
-            ->where('object_id', $comment->id)
-            ->where('object_type', Comment::class)
-            ->first();
+        $reaction = $comment->reactions()->where('user_id', $userId)->first();
 
         if ($reaction) {
             $hasReaction = false;
@@ -229,7 +223,7 @@ class PostController extends Controller
             ]);
         }
 
-        $reactions = Reaction::where('object_id', $comment->id)->where('object_type', Comment::class)->count();
+        $reactions = $comment->reactions()->count();
 
         return response([
             'num_of_reactions' => $reactions,
