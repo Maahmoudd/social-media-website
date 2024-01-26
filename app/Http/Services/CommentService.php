@@ -9,13 +9,12 @@ class CommentService
 {
     public function createComment($request, $post)
     {
-        $data = $request->validate([
-            'comment' => ['required']
-        ]);
+
         $comment = Comment::create([
             'post_id' => $post->id,
-            'comment' => nl2br($data['comment']),
-            'user_id' => Auth::id()
+            'comment' => nl2br($request['comment']),
+            'user_id' => Auth::id(),
+            'parent_id' => $request['parent_id'] ?: null
         ]);
         return $comment;
     }

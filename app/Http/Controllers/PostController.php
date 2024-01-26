@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateCommentRequest;
 use App\Http\Requests\ReactionRequest;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdateCommentRequest;
@@ -75,9 +76,9 @@ class PostController extends Controller
         ]);
     }
 
-    public function createComment(Request $request, Post $post)
+    public function createComment(CreateCommentRequest $request, Post $post)
     {
-        $comment = $this->commentService->createComment($request, $post);
+        $comment = $this->commentService->createComment($request->validated(), $post);
         return response(new CommentResource($comment), 201);
     }
 
