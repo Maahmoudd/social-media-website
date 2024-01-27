@@ -19,13 +19,15 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $posts = $this->homeService->index();
+        $posts = $this->homeService->postsIndex();
+        $groups = $this->homeService->groupsIndex();
         if ($request->wantsJson()) {
             return $posts;
         }
 
         return Inertia::render('Home', [
-            'posts' => $posts
+            'posts' => $posts,
+            'groups' => $groups
         ]);
     }
 }
