@@ -13,37 +13,48 @@ import TextInput from "@/Components/TextInput.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import InputTextarea from "@/Components/InputTextarea.vue";
 import axiosClient from "@/axiosClient.js";
+
 const props = defineProps({
     modelValue: Boolean
 })
+
 const formErrors = ref({});
 const form = useForm({
     name: '',
     auto_approval: true,
     about: '',
 })
+
 const show = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
 })
-const emit = defineEmits(['update:modelValue', 'hide'])
+
+
+const emit = defineEmits(['update:modelValue', 'hide', 'create'])
+
+
 function closeModal() {
     show.value = false
     emit('hide')
     resetModal();
 }
+
 function resetModal() {
     form.reset()
     formErrors.value = {}
 }
+
 function submit() {
     axiosClient.post(route('group.create'), form)
-        .then(res => {
-            console.log(res)
+        .then(({data}) => {
             closeModal()
+            emit('create', data)
         })
 }
+
 </script>
+
 <template>
     <teleport to="body">
         <TransitionRoot appear :show="show" as="template">
@@ -59,6 +70,7 @@ function submit() {
                 >
                     <div class="fixed inset-0 bg-black/25"/>
                 </TransitionChild>
+
                 <div class="fixed inset-0 overflow-y-auto">
                     <div
                         class="flex min-h-full items-center justify-center p-4 text-center"
@@ -96,17 +108,22 @@ function submit() {
                                             autofocus
                                         />
                                     </div>
+
                                     <div class="mb-3">
                                         <label>
                                             <Checkbox name="remember" v-model:checked="form.auto_approval"/>
                                             Enable Auto Approval
                                         </label>
                                     </div>
+
                                     <div class="mb-3">
                                         <label>About Group</label>
+
                                         <InputTextarea v-model="form.about" class="w-full"/>
                                     </div>
+
                                 </div>
+
                                 <div class="flex justify-end gap-2 py-3 px-4">
                                     <button
                                         class="text-gray-800 flex gap-1 items-center justify-center bg-gray-100 rounded-md hover:bg-gray-200 py-2 px-4"
