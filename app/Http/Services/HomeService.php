@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,7 +22,7 @@ class HomeService
                 $query->where('user_id', $userId); // SELECT * from reactions WHERE user_id = ?
             }])
             ->latest()
-            ->paginate(20);
-        return $posts;
+            ->paginate(10);
+        return PostResource::collection($posts);
     }
 }
