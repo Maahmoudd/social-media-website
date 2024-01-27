@@ -8,9 +8,12 @@ import {usePage} from "@inertiajs/vue3";
 import {ref} from "vue";
 import axiosClient from "@/axiosClient.js";
 import {Disclosure, DisclosureButton, DisclosurePanel} from "@headlessui/vue";
+
 const authUser = usePage().props.auth.user;
+
 const newCommentText = ref('')
 const editingComment = ref(null);
+
 const props = defineProps({
     post: Object,
     data: Object,
@@ -19,6 +22,8 @@ const props = defineProps({
         default: null
     }
 })
+const emit = defineEmits(['commentCreate', 'commentDelete']);
+
 function startCommentEdit(comment) {
     console.log(comment)
     editingComment.value = {
@@ -26,6 +31,7 @@ function startCommentEdit(comment) {
         comment: comment.comment.replace(/<br\s*\/?>/gi, '\n') // <br />, <br > <br> <br/>, <br    />
     }
 }
+
 function createComment() {
     axiosClient.post(route('post.comment.create', props.post), {
         comment: newCommentText.value,
@@ -38,8 +44,10 @@ function createComment() {
                 props.parentComment.num_of_comments++;
             }
             props.post.num_of_comments++;
+            emit('commentCreate', data)
         })
 }
+
 function deleteComment(comment) {
     if (!window.confirm('Are you sure you want to delete this comment?')) {
         return false;
@@ -47,6 +55,7 @@ function deleteComment(comment) {
     axiosClient.delete(route('comment.delete', comment.id))
         .then(({data}) => {
             console.log(props.data.comments)
+
             const commentIndex = props.data.comments.findIndex(c => c.id === comment.id)
             props.data.comments.splice(commentIndex, 1)
             console.log(props.data.comments)
@@ -54,8 +63,10 @@ function deleteComment(comment) {
                 props.parentComment.num_of_comments--;
             }
             props.post.num_of_comments--;
+            emit('commentDelete', comment)
         })
 }
+
 function updateComment() {
     axiosClient.put(route('comment.update', editingComment.value.id), editingComment.value)
         .then(({data}) => {
@@ -68,6 +79,7 @@ function updateComment() {
             })
         })
 }
+
 function sendCommentReaction(comment) {
     axiosClient.post(route('comment.reaction', comment.id), {
         reaction: 'like'
@@ -77,7 +89,22 @@ function sendCommentReaction(comment) {
             comment.num_of_reactions = data.num_of_reactions;
         })
 }
+
+function onCommentCreate(comment) {
+    if (props.parentComment) {
+        props.parentComment.num_of_comments++;
+    }
+    emit('commentCreate', comment)
+}
+
+function onCommentDelete(comment) {
+    if (props.parentComment) {
+        props.parentComment.num_of_comments--;
+    }
+    emit('commentDelete', comment)
+}
 </script>
+
 <template>
     <div class="flex gap-2 mb-3">
         <a href="javascript:void(0)">
@@ -114,6 +141,7 @@ function sendCommentReaction(comment) {
                 <div v-if="editingComment && editingComment.id === comment.id">
                     <InputTextarea v-model="editingComment.comment" placeholder="Enter your comment here"
                                    rows="1" class="w-full max-h-[160px] resize-none"></InputTextarea>
+
                     <div class="flex gap-2 justify-end">
                         <button @click="editingComment = null" class="rounded-r-none text-indigo-500">cancel
                         </button>
@@ -145,12 +173,16 @@ function sendCommentReaction(comment) {
                     <DisclosurePanel class="mt-3">
                         <CommentList :post="post"
                                      :data="{comments: comment.comments}"
-                                     :parent-comment="comment"/>
+                                     :parent-comment="comment"
+                                     @comment-create="onCommentCreate"
+                                     @comment-delete="onCommentDelete"/>
                     </DisclosurePanel>
                 </Disclosure>
             </div>
         </div>
     </div>
 </template>
+
 <style scoped>
+
 </style>
