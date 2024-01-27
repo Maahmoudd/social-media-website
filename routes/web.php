@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -44,6 +46,8 @@ Route::middleware('auth')
             Route::post('/{comment}/reaction', [PostController::class, 'commentReaction'])
                 ->name('reaction');
         });
+        Route::post('/group', [GroupController::class, 'store'])
+            ->name('group.create');
 });
 
 require __DIR__.'/auth.php';
