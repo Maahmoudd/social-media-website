@@ -12,42 +12,61 @@ Route::get('/', [HomeController::class, 'index'])
     ->name('dashboard');
 Route::get('/u/{user:username}', [ProfileController::class, 'index'])
     ->name('profile');
+Route::get('/g/{group:slug}', [GroupController::class, 'profile'])
+    ->name('group.profile');
 
 Route::middleware('auth')
     ->group(function () {
-        Route::prefix('profile')->as('profile.')->group(function () {
-            Route::post('/update-images', [ProfileController::class, 'updateImage'])
-                ->name('updateImages');
-            Route::patch('/', [ProfileController::class, 'update'])
-                ->name('update');
-            Route::delete('/', [ProfileController::class, 'destroy'])
-                ->name('destroy');
+        Route::prefix('profile')
+            ->as('profile.')
+            ->controller(ProfileController::class)
+            ->group(function () {
+                Route::post('/update-images', 'updateImage')
+                    ->name('updateImages');
+                Route::patch('/', 'update')
+                    ->name('update');
+                Route::delete('/', 'destroy')
+                    ->name('destroy');
         });
 
-        Route::prefix('posts')->as('post.')->group(function () {
-            Route::post('/', [PostController::class, 'store'])
-                ->name('create');
-            Route::put('/{post}', [PostController::class, 'update'])
-                ->name('update');
-            Route::delete('/{post}', [PostController::class, 'destroy'])
-                ->name('destroy');
-            Route::get('/download/{attachment}', [PostController::class, 'downloadAttachment'])
-                ->name('download');
-            Route::post('/{post}/reaction', [PostController::class, 'postReaction'])
-                ->name('reaction');
-            Route::post('/{post}/comment', [PostController::class, 'createComment'])
-                ->name('comment.create');
+        Route::prefix('posts')
+            ->as('post.')
+            ->controller(PostController::class)
+            ->group(function () {
+                Route::post('/', 'store')
+                    ->name('create');
+                Route::put('/{post}', 'update')
+                    ->name('update');
+                Route::delete('/{post}', 'destroy')
+                    ->name('destroy');
+                Route::get('/download/{attachment}', 'downloadAttachment')
+                    ->name('download');
+                Route::post('/{post}/reaction', 'postReaction')
+                    ->name('reaction');
+                Route::post('/{post}/comment', 'createComment')
+                    ->name('comment.create');
         });
-        Route::prefix('comment')->as('comment.')->group(function () {
-            Route::delete('/{comment}', [PostController::class, 'deleteComment'])
-                ->name('delete');
-            Route::put('//{comment}', [PostController::class, 'updateComment'])
-                ->name('update');
-            Route::post('/{comment}/reaction', [PostController::class, 'commentReaction'])
-                ->name('reaction');
+        Route::prefix('comment')
+            ->as('comment.')
+            ->controller(PostController::class)
+            ->group(function () {
+                Route::delete('/{comment}', 'deleteComment')
+                    ->name('delete');
+                Route::put('//{comment}', 'updateComment')
+                    ->name('update');
+                Route::post('/{comment}/reaction', 'commentReaction')
+                    ->name('reaction');
         });
-        Route::post('/group', [GroupController::class, 'store'])
-            ->name('group.create');
+        Route::prefix('group')
+            ->as('group.')
+            ->controller(GroupController::class)
+            ->group(function (){
+                Route::post('/', 'store')
+                    ->name('create');
+                Route::post('/update-images/{group:slug}', 'updateImage')
+                    ->name('updateImages');
+        });
+
 });
 
 require __DIR__.'/auth.php';
