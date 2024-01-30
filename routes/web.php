@@ -65,6 +65,10 @@ Route::middleware('auth')
                     ->name('create');
                 Route::post('/update-images/{group:slug}', 'updateImage')
                     ->name('updateImages');
+                Route::post('/invite/{group:slug}', 'inviteUsers')
+                    ->name('inviteUsers');
+                Route::get('/approve-invitation/{token}', 'approveInvitation')
+                    ->name('approveInvitation');
         });
 
 });

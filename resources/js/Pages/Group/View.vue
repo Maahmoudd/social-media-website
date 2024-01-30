@@ -7,15 +7,22 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import TabItem from "@/Pages/Profile/Partials/TabItem.vue";
 import {useForm} from '@inertiajs/vue3'
 import PrimaryButton from "@/Components/PrimaryButton.vue";
+import InviteUserModal from "@/Pages/Group/InviteUserModal.vue";
+
 const imagesForm = useForm({
     thumbnail: null,
     cover: null,
 })
+
 const showNotification = ref(true)
 const coverImageSrc = ref('')
 const thumbnailImageSrc = ref('')
+const showInviteUserModal = ref(false);
+
 const authUser = usePage().props.auth.user;
+
 const isCurrentUserAdmin = computed(() => props.group.role === 'admin')
+
 const props = defineProps({
     errors: Object,
     success: {
@@ -25,6 +32,7 @@ const props = defineProps({
         type: Object
     }
 });
+
 function onCoverChange(event) {
     imagesForm.cover = event.target.files[0]
     if (imagesForm.cover) {
@@ -35,6 +43,7 @@ function onCoverChange(event) {
         reader.readAsDataURL(imagesForm.cover)
     }
 }
+
 function onThumbnailChange(event) {
     imagesForm.thumbnail = event.target.files[0]
     if (imagesForm.thumbnail) {
@@ -45,14 +54,17 @@ function onThumbnailChange(event) {
         reader.readAsDataURL(imagesForm.thumbnail)
     }
 }
+
 function resetCoverImage() {
     imagesForm.cover = null;
     coverImageSrc.value = null
 }
+
 function resetThurmbnailImage() {
     imagesForm.thumbnail = null;
     thumbnailImageSrc.value = null
 }
+
 function submitCoverImage() {
     imagesForm.post(route('group.updateImages', props.group.slug), {
         onSuccess: () => {
@@ -64,6 +76,7 @@ function submitCoverImage() {
         },
     })
 }
+
 function submitThurmbnailImage() {
     imagesForm.post(route('group.updateImages', props.group.slug), {
         onSuccess: () => {
@@ -75,7 +88,9 @@ function submitThurmbnailImage() {
         },
     })
 }
+
 </script>
+
 <template>
     <AuthenticatedLayout>
         <div class="max-w-[768px] mx-auto h-full overflow-auto">
@@ -105,6 +120,7 @@ function submitThurmbnailImage() {
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
                         </svg>
+
                         Update Cover Image
                         <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0"
                                @change="onCoverChange"/>
@@ -124,6 +140,7 @@ function submitThurmbnailImage() {
                         </button>
                     </div>
                 </div>
+
                 <div class="flex">
                     <div class="flex items-center justify-center relative group/thumbnail -mt-[64px] ml-[48px] w-[128px] h-[128px] rounded-full">
                         <img :src="thumbnailImageSrc || group.thumbnail_url || '/img/default_avatar.webp'"
@@ -132,9 +149,11 @@ function submitThurmbnailImage() {
                             v-if="isCurrentUserAdmin && !thumbnailImageSrc"
                             class="absolute left-0 top-0 right-0 bottom-0 bg-black/50 text-gray-200 rounded-full opacity-0 flex items-center justify-center group-hover/thumbnail:opacity-100">
                             <CameraIcon class="w-8 h-8"/>
+
                             <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0"
                                    @change="onThumbnailChange"/>
                         </button>
+
                         <div v-else-if="isCurrentUserAdmin" class="absolute top-1 right-0 flex flex-col gap-2">
                             <button
                                 @click="resetThurmbnailImage"
@@ -150,7 +169,9 @@ function submitThurmbnailImage() {
                     </div>
                     <div class="flex justify-between items-center flex-1 p-4">
                         <h2 class="font-bold text-lg">{{ group.name }}</h2>
-                        <PrimaryButton v-if="isCurrentUserAdmin">Invite Users</PrimaryButton>
+
+                        <PrimaryButton @click="showInviteUserModal = true"
+                                       v-if="isCurrentUserAdmin">Invite Users</PrimaryButton>
                         <PrimaryButton v-if="!group.role && group.auto_approval">Join to Group</PrimaryButton>
                         <PrimaryButton v-if="!group.role && !group.auto_approval">Request to join</PrimaryButton>
                     </div>
@@ -172,6 +193,7 @@ function submitThurmbnailImage() {
                             <TabItem text="Photos" :selected="selected"/>
                         </Tab>
                     </TabList>
+
                     <TabPanels class="mt-2">
                         <TabPanel class="bg-white p-3 shadow">
                             Posts
@@ -190,6 +212,9 @@ function submitThurmbnailImage() {
             </div>
         </div>
     </AuthenticatedLayout>
+    <InviteUserModal v-model="showInviteUserModal" />
 </template>
+
 <style scoped>
+
 </style>

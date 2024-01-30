@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InviteUsersRequest;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupImageRequest;
 use App\Http\Requests\UpdateGroupRequest;
@@ -54,5 +55,18 @@ class GroupController extends Controller
     {
         $success = $this->groupService->updateGroupImage($request->validated(), $group);
         return back()->with('success', $success);
+    }
+
+    public function inviteUsers(InviteUsersRequest $request, Group $group)
+    {
+        $this->groupService->inviteUsers($request->validated(), $group, $request->user, $request->groupUser);
+        return back()->with('success', 'User was invited to join to group');
+    }
+
+    public function approveInvitation(string $token)
+    {
+        $groupUser = $this->groupService->approveInvitation($token);
+        return redirect(route('group.profile', $groupUser->group))
+            ->with('success', 'You accepted to join to group "'.$groupUser->group->name.'"');
     }
 }

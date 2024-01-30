@@ -6,8 +6,12 @@ use App\Http\Enums\GroupUserRole;
 use App\Http\Enums\GroupUserStatus;
 use App\Models\Group;
 use App\Models\GroupUser;
+use App\Notifications\InvitationApproved;
+use App\Notifications\InvitationInGroup;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class GroupService
 {
@@ -62,6 +66,57 @@ class GroupService
 //        session('success', 'Cover image has been updated');
 
         return $success;
+    }
+
+    public function inviteUsers($request, $group, $user, $groupUser)
+    {
+        if ($groupUser) {
+            $groupUser->delete();
+        }
+
+        $hours = 24;
+        $token = Str::random(256);
+
+        GroupUser::create([
+            'status' => GroupUserStatus::PENDING->value,
+            'role' => GroupUserRole::USER->value,
+            'token' => $token,
+            'token_expire_date' => Carbon::now()->addHours($hours),
+            'user_id' => $user->id,
+            'group_id' => $group->id,
+            'created_by' => Auth::id(),
+        ]);
+
+        $user->notify(new InvitationInGroup($group, $hours, $token));
+    }
+
+    public function approveInvitation($token)
+    {
+        $groupUser = GroupUser::query()
+            ->where('token', $token)
+            ->first();
+
+        $errorTitle = '';
+        if (!$groupUser) {
+            $errorTitle = 'The link is not valid';
+        } else if ($groupUser->token_used || $groupUser->status === GroupUserStatus::APPROVED->value) {
+            $errorTitle = 'The link is already used';
+        } else if ($groupUser->token_expire_date < Carbon::now()) {
+            $errorTitle = 'The link is expired';
+        }
+
+        if ($errorTitle) {
+            return \inertia('Error', compact('errorTitle'));
+        }
+
+        $groupUser->status = GroupUserStatus::APPROVED->value;
+        $groupUser->token_used = Carbon::now();
+        $groupUser->save();
+
+        $adminUser = $groupUser->adminUser;
+
+        $adminUser->notify(new InvitationApproved($groupUser->group, $groupUser->user));
+        return $groupUser;
     }
 
 }
