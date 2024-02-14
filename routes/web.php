@@ -73,6 +73,8 @@ Route::middleware('auth')
                     ->name('join');
                 Route::post('/approve-request/{group:slug}','approveRequest')
                     ->name('approveRequest');
+                Route::post('/change-role/{group:slug}', 'changeRole')
+                    ->name('changeRole');
         });
 
 });

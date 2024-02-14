@@ -56,4 +56,5 @@ class User extends Authenticatable implements MustVerifyEmail
             ->saveSlugsTo('username')
             ->doNotGenerateSlugsOnUpdate();
     }
+
 }
