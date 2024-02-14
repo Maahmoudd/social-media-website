@@ -71,6 +71,8 @@ Route::middleware('auth')
                     ->name('approveInvitation');
                 Route::post('/join/{group:slug}', 'join')
                     ->name('join');
+                Route::post('/approve-request/{group:slug}','approveRequest')
+                    ->name('approveRequest');
         });
 
 });

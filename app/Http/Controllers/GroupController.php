@@ -6,9 +6,13 @@ use App\Http\Requests\InviteUsersRequest;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupImageRequest;
 use App\Http\Requests\UpdateGroupRequest;
+use App\Http\Requests\UserGroupRequest;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\UserResource;
 use App\Http\Services\GroupService;
 use App\Models\Group;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 
 class GroupController extends Controller
@@ -23,9 +27,15 @@ class GroupController extends Controller
     public function profile(Group $group)
     {
         $group->load('currentUserGroup');
+
+        $users = $group->approvedUsers()->orderBy('name')->get();
+        $requests = $group->pendingUsers()->orderBy('name')->get();
+
         return Inertia::render('Group/View', [
             'success' => session('success'),
-            'group' => new GroupResource($group)
+            'group' => new GroupResource($group),
+            'users' => UserResource::collection($users),
+            'requests' => UserResource::collection($requests)
         ]);
     }
 
@@ -74,4 +84,15 @@ class GroupController extends Controller
         $successMessage = $this->groupService->joinGroup($group);
         return back()->with('success', $successMessage);
     }
+
+    public function approveRequest(UserGroupRequest $request, Group $group)
+    {
+        if (!$group->isAdmin(Auth::id())) {
+            return response("You don't have permission to perform this action", 403);
+        }
+        $data = $request->validated();
+        $response = $this->groupService->approveRequest($data, $group);
+        return back()->with('success', 'User "'.$response['user']->name.'" was '.($response['approved'] ? 'approved' : 'rejected'));
+    }
+
 }

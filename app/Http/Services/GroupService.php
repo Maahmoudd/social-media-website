@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\GroupUser;
 use App\Notifications\InvitationApproved;
 use App\Notifications\InvitationInGroup;
+use App\Notifications\RequestApproved;
 use App\Notifications\RequestToJoinGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -51,7 +52,7 @@ class GroupService
             if ($group->cover_path) {
                 Storage::disk('public')->delete($group->cover_path);
             }
-            $path = $cover->store('group-'.$group->id, 'public');
+            $path = $cover->store('group-' . $group->id, 'public');
             $group->update(['cover_path' => $path]);
             $success = 'Your cover image was updated';
         }
@@ -60,7 +61,7 @@ class GroupService
             if ($group->thumbnail_path) {
                 Storage::disk('public')->delete($group->thumbnail_path);
             }
-            $path = $thumbnail->store('group-'.$group->id, 'public');
+            $path = $thumbnail->store('group-' . $group->id, 'public');
             $group->update(['thumbnail_path' => $path]);
             $success = 'Your thumbnail image was updated';
         }
@@ -144,4 +145,26 @@ class GroupService
         return $successMessage;
     }
 
+    public function approveRequest($data, $group)
+    {
+        $groupUser = GroupUser::where('user_id', $data['user_id'])
+            ->where('group_id', $group->id)
+            ->where('status', GroupUserStatus::PENDING->value)
+            ->first();
+
+        if ($groupUser) {
+            $approved = false;
+            if ($data['action'] === 'approve') {
+                $approved = true;
+                $groupUser->status = GroupUserStatus::APPROVED->value;
+            } else {
+                $groupUser->status = GroupUserStatus::REJECTED->value;
+            }
+            $groupUser->save();
+
+            $user = $groupUser->user;
+            $user->notify(new RequestApproved($groupUser->group, $user, $approved));
+        }
+        return compact('user', 'approved');
+    }
 }
