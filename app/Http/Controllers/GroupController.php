@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Resources\GroupResource;
 use App\Http\Services\GroupService;
 use App\Models\Group;
-use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 
 class GroupController extends Controller
@@ -68,5 +67,11 @@ class GroupController extends Controller
         $groupUser = $this->groupService->approveInvitation($token);
         return redirect(route('group.profile', $groupUser->group))
             ->with('success', 'You accepted to join to group "'.$groupUser->group->name.'"');
+    }
+
+    public function join(Group $group)
+    {
+        $successMessage = $this->groupService->joinGroup($group);
+        return back()->with('success', $successMessage);
     }
 }

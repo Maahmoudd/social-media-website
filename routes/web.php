@@ -69,6 +69,8 @@ Route::middleware('auth')
                     ->name('inviteUsers');
                 Route::get('/approve-invitation/{token}', 'approveInvitation')
                     ->name('approveInvitation');
+                Route::post('/join/{group:slug}', 'join')
+                    ->name('join');
         });
 
 });
