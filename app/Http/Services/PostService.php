@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\Post;
 use App\Models\PostAttachment;
+use App\Notifications\PostDeleted;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -85,9 +86,16 @@ class PostService
     public function deletePost($post)
     {
         $id = Auth::id();
-        if ($post->user_id !== $id) {
-            return response("You don't have permission to delete this post", 403);
+
+        if ($post->isOwner($id) || $post->group && $post->group->isAdmin($id)) {
+            $post->delete();
+
+            if (!$post->isOwner($id)) {
+                $post->user->notify(new PostDeleted($post->group));
+            }
+
+            return true;
         }
-        return $post->delete();
+        return false;
     }
 }

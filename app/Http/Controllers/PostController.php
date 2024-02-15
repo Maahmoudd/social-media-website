@@ -40,22 +40,18 @@ class PostController extends Controller
         return back();
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdatePostRequest $request, Post $post)
     {
         $this->postService->updatePost($request, $post);
         return back();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Post $post)
     {
-        $this->postService->deletePost($post);
-        return back();
+        $deleted = $this->postService->deletePost($post);
+        if (!$deleted){
+            return response("You don't have permission to delete this post", 403);
+        }
     }
 
     public function downloadAttachment(PostAttachment $attachment)
@@ -82,13 +78,10 @@ class PostController extends Controller
         return response(new CommentResource($comment), 201);
     }
 
-    public function deleteComment(UpdateCommentRequest $comment)
+    public function deleteComment(Comment $comment)
     {
-        $deleted = $this->commentService->deleteComment($comment);
-        if (!$deleted) {
-            return response("You don't have permission to delete this comment.", 403);
-        }
-        return response('', 204);
+        $this->commentService->deleteComment($comment);
+        return response("You don't have permission to delete this comment.", 403);
     }
 
     public function updateComment(UpdateCommentRequest $request, Comment $comment)

@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Comment;
+use App\Notifications\CommentDeleted;
 use Illuminate\Support\Facades\Auth;
 
 class CommentService
@@ -21,7 +22,17 @@ class CommentService
 
     public function deleteComment($comment)
     {
-        return $comment->delete();
+        $post = $comment->post;
+        $id = Auth::id();
+        if ($comment->isOwner($id) || $post->isOwner($id)) {
+            $comment->delete();
+
+            if (!$comment->isOwner($id)) {
+                $comment->user->notify(new CommentDeleted($comment, $post));
+            }
+
+            return response('', 204);
+        }
     }
 
     public function updateComment($request, $comment)
