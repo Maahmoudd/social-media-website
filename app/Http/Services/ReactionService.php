@@ -5,6 +5,10 @@ namespace App\Http\Services;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Reaction;
+use App\Models\User;
+use App\Notifications\CommentCreated;
+use App\Notifications\ReactionAddedOnComment;
+use App\Notifications\ReactionAddedOnPost;
 use Illuminate\Support\Facades\Auth;
 
 class ReactionService
@@ -26,6 +30,13 @@ class ReactionService
                 'user_id' => $userId,
                 'type' => $data['reaction']
             ]);
+            if (!$object->isOwner($userId)) {
+                $user = User::where('id', $userId)->first();
+                if ($objectType === Comment::class) {
+                    $object->user->notify(new ReactionAddedOnComment($object->post, $object, $user));
+                }
+                else $object->user->notify(new ReactionAddedOnPost($object, $user));
+            }
         }
         $reactions = $object->reactions()->count();
         return compact('hasReaction' , 'reactions');

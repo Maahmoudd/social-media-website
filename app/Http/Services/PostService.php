@@ -4,9 +4,11 @@ namespace App\Http\Services;
 
 use App\Models\Post;
 use App\Models\PostAttachment;
+use App\Notifications\PostCreated;
 use App\Notifications\PostDeleted;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class PostService
@@ -34,6 +36,12 @@ class PostService
                 ]);
             }
             DB::commit();
+            $group = $post->group;
+
+            if ($group) {
+                $users = $group->approvedUsers()->where('users.id', '!=', $user->id)->get();
+                Notification::send($users, new PostCreated($post, $group));
+            }
         } catch (\Exception $e) {
             foreach ($allFilePaths as $path) {
                 Storage::disk('public')->delete($path);

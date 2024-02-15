@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Comment;
+use App\Notifications\CommentCreated;
 use App\Notifications\CommentDeleted;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,6 +18,8 @@ class CommentService
             'user_id' => Auth::id(),
             'parent_id' => $request['parent_id'] ?: null
         ]);
+        $post = $comment->post;
+        $post->user->notify(new CommentCreated($comment));
         return $comment;
     }
 
