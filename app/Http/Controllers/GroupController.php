@@ -17,6 +17,7 @@ use App\Models\GroupUser;
 use App\Models\Post;
 use App\Models\User;
 use App\Notifications\RoleChanged;
+use App\Notifications\UserRemovedFromGroup;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -128,6 +129,15 @@ class GroupController extends Controller
         return back()->with('success', 'User "'.$response['user']->name.'" was '.($response['approved'] ? 'approved' : 'rejected'));
     }
 
+    public function removeUser(Request $request, Group $group)
+    {
+        if (!$group->isAdmin(Auth::id())) {
+            return response("You don't have permission to perform this action", 403);
+        }
+        $this->groupService->removeUser($request, $group);
+        return back();
+    }
+
     public function changeRole(Request $request, Group $group)
     {
         if (!$group->isAdmin(Auth::id())) {
@@ -153,8 +163,7 @@ class GroupController extends Controller
             $groupUser->save();
 
             $groupUser->user->notify(new RoleChanged($group, $data['role']));
-
-            return back();
         }
+        return back();
     }
 }

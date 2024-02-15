@@ -10,6 +10,7 @@ use App\Notifications\InvitationApproved;
 use App\Notifications\InvitationInGroup;
 use App\Notifications\RequestApproved;
 use App\Notifications\RequestToJoinGroup;
+use App\Notifications\UserRemovedFromGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -166,5 +167,28 @@ class GroupService
             $user->notify(new RequestApproved($groupUser->group, $user, $approved));
         }
         return compact('user', 'approved');
+    }
+
+    public function removeUser($request, $group)
+    {
+        $data = $request->validate([
+            'user_id' => ['required'],
+        ]);
+
+        $user_id = $data['user_id'];
+        if ($group->isOwner($user_id)) {
+            return response("The owner of the group cannot be removed", 403);
+        }
+
+        $groupUser = GroupUser::where('user_id', $user_id)
+            ->where('group_id', $group->id)
+            ->first();
+
+        if ($groupUser) {
+            $user = $groupUser->user;
+            $groupUser->delete();
+
+            $user->notify(new UserRemovedFromGroup($group));
+        }
     }
 }

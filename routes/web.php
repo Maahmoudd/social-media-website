@@ -77,6 +77,8 @@ Route::middleware('auth')
                     ->name('approveRequest');
                 Route::post('/change-role/{group:slug}', 'changeRole')
                     ->name('changeRole');
+                Route::delete('/remove-user/{group:slug}', 'removeUser')
+                    ->name('removeUser');
         });
 
 });
