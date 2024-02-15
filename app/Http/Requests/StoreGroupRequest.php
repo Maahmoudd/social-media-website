@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreGroupRequest extends FormRequest
 {
@@ -11,6 +12,10 @@ class StoreGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        $group = $this->route('group');
+        if ($group){
+            return $group->isAdmin(Auth::id());
+        }
         return true;
     }
 

@@ -63,6 +63,8 @@ Route::middleware('auth')
             ->group(function (){
                 Route::post('/', 'store')
                     ->name('create');
+                Route::put('/{group:slug}', 'update')
+                    ->name('update');
                 Route::post('/update-images/{group:slug}', 'updateImage')
                     ->name('updateImages');
                 Route::post('/invite/{group:slug}', 'inviteUsers')
