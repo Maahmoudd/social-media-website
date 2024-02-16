@@ -56,6 +56,8 @@ Route::middleware('auth')
                     ->name('reaction');
                 Route::post('/{post}/comment', 'createComment')
                     ->name('comment.create');
+                Route::post('/ai-post', 'aiPostContent')
+                    ->name('aiContent');
         });
         Route::prefix('comment')
             ->as('comment.')

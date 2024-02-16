@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class PostService
 {
@@ -120,5 +121,22 @@ class PostService
             return true;
         }
         return false;
+    }
+
+    public function aiPost($request)
+    {
+        $prompt = $request->get('prompt');
+
+        $result = OpenAI::chat()->create([
+            'model' => 'gpt-4',
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => "Please generate social media post content based on the following prompt. Generated formatted content with multiple paragraphs. Put hashtags after 2 lines from the main content". PHP_EOL .PHP_EOL. "Prompt: " .PHP_EOL
+                        . $prompt
+                ],
+            ],
+        ]);
+        return $result;
     }
 }

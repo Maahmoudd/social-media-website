@@ -14,6 +14,7 @@ use App\Http\Services\ReactionService;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostAttachment;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
@@ -100,6 +101,14 @@ class PostController extends Controller
         return response([
             'num_of_reactions' => $reaction['reactions'],
             'current_user_has_reaction' => $reaction['hasReaction']
+        ]);
+    }
+
+    public function aiPostContent(Request $request)
+    {
+        $result = $this->postService->aiPost($request);
+        return response([
+            'content' => $result->choices[0]->message->content
         ]);
     }
 }
