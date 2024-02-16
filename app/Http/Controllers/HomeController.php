@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PostResource;
+use App\Http\Resources\GroupResource;
+use App\Http\Resources\UserResource;
 use App\Http\Services\HomeService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,6 +20,7 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+        $user = $request->user();
         $posts = $this->homeService->postsIndex();
         $groups = $this->homeService->groupsIndex();
         if ($request->wantsJson()) {
@@ -27,7 +29,8 @@ class HomeController extends Controller
 
         return Inertia::render('Home', [
             'posts' => $posts,
-            'groups' => $groups
+            'groups' => GroupResource::collection($groups),
+            'followings' => UserResource::collection($user->followings)
         ]);
     }
 }

@@ -82,17 +82,9 @@ class ProfileService
             return $posts;
         }
 
-        $followers = User::query()
-            ->select('users.*')
-            ->join('followers AS f', 'f.follower_id', 'users.id')
-            ->where('f.user_id', $user->id)
-            ->get();
+        $followers = $user->followers;
 
-        $followings = User::query()
-            ->select('users.*')
-            ->join('followers AS f', 'f.user_id', 'users.id')
-            ->where('f.follower_id', $user->id)
-            ->get();
+        $followings = $user->followings;
 
         return compact('posts', 'followers', 'followings');
     }
