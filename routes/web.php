@@ -4,6 +4,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -93,6 +94,9 @@ Route::middleware('auth')
                 Route::delete('/remove-user/{group:slug}', 'removeUser')
                     ->name('removeUser');
         });
+
+        Route::get('/search/{search?}', [SearchController::class, 'search'])
+            ->name('search');
 
 });
 
