@@ -2,6 +2,10 @@
 
 namespace App\Http\Services;
 
+use App\Http\Resources\PostResource;
+use App\Models\Follower;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -57,4 +61,39 @@ class ProfileService
         $request->session()->regenerateToken();
     }
 
+    public function profileFollower($user)
+    {
+        $isCurrentUserFollower = false;
+        if (!Auth::guest()) {
+            $isCurrentUserFollower = Follower::where('user_id', $user->id)->where('follower_id', Auth::id())->exists();
+        }
+        $followerCount = Follower::where('user_id', $user->id)->count();
+        return compact('isCurrentUserFollower', 'followerCount');
+    }
+
+    public function followingPosts($request, $user)
+    {
+        $posts = Post::postsForTimeline(Auth::id())
+            ->where('user_id', $user->id)
+            ->paginate(10);
+
+        $posts = PostResource::collection($posts);
+        if ($request->wantsJson()) {
+            return $posts;
+        }
+
+        $followers = User::query()
+            ->select('users.*')
+            ->join('followers AS f', 'f.follower_id', 'users.id')
+            ->where('f.user_id', $user->id)
+            ->get();
+
+        $followings = User::query()
+            ->select('users.*')
+            ->join('followers AS f', 'f.user_id', 'users.id')
+            ->where('f.follower_id', $user->id)
+            ->get();
+
+        return compact('posts', 'followers', 'followings');
+    }
 }
