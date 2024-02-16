@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\PostAttachment;
 use App\Notifications\PostCreated;
@@ -49,6 +50,18 @@ class PostService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function viewPost($post)
+    {
+        $post->loadCount('reactions');
+        $post->load([
+            'comments' => function ($query) {
+                $query->withCount('reactions'); // SELECT * FROM comments WHERE post_id IN (1, 2, 3...)
+                // SELECT COUNT(*) from reactions
+            },
+        ]);
+        return new PostResource($post);
     }
 
     public function updatePost($request, $post)

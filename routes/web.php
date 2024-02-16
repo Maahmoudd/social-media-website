@@ -33,6 +33,8 @@ Route::middleware('auth')
             ->as('post.')
             ->controller(PostController::class)
             ->group(function () {
+                Route::get('/{post}', 'view')
+                    ->name('view');
                 Route::post('/', 'store')
                     ->name('create');
                 Route::put('/{post}', 'update')

@@ -14,7 +14,6 @@ use App\Http\Services\ReactionService;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostAttachment;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
@@ -31,13 +30,18 @@ class PostController extends Controller
         $this->commentService = $commentService;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StorePostRequest $request)
     {
         $this->postService->storePost($request);
         return back();
+    }
+
+    public function view(Post $post)
+    {
+        $post = $this->postService->viewPost($post);
+        return inertia('Post/View', [
+            'post' => $post
+        ]);
     }
 
     public function update(UpdatePostRequest $request, Post $post)
