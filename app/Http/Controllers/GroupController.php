@@ -9,12 +9,14 @@ use App\Http\Requests\UpdateGroupImageRequest;
 use App\Http\Requests\UserGroupRequest;
 use App\Http\Resources\GroupResource;
 use App\Http\Resources\GroupUserResource;
+use App\Http\Resources\PostAttachmentResource;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\UserResource;
 use App\Http\Services\GroupService;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Post;
+use App\Models\PostAttachment;
 use App\Models\User;
 use App\Notifications\RoleChanged;
 use App\Notifications\UserRemovedFromGroup;
@@ -62,13 +64,20 @@ class GroupController extends Controller
             ->where('group_id', $group->id)
             ->get();
         $requests = $group->pendingUsers()->orderBy('name')->get();
-
+        $photos = PostAttachment::query()
+            ->select('post_attachments.*')
+            ->join('posts AS p', 'p.id', 'post_attachments.post_id')
+            ->where('p.group_id', $group->id)
+            ->where('mime', 'like', 'image/%')
+            ->latest()
+            ->get();
         return Inertia::render('Group/View', [
             'success' => session('success'),
             'group' => new GroupResource($group),
             'posts' => $posts,
             'users' => GroupUserResource::collection($users),
-            'requests' => UserResource::collection($requests)
+            'requests' => UserResource::collection($requests),
+            'photos' => PostAttachmentResource::collection($photos)
         ]);
     }
 

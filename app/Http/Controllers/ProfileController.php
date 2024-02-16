@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DeleteProfileRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\UpdateProfileImagesRequest;
+use App\Http\Resources\PostAttachmentResource;
 use App\Http\Resources\UserResource;
 use App\Http\Services\ProfileService;
 use App\Models\User;
@@ -25,6 +26,7 @@ class ProfileController extends Controller
     {
         $follower = $this->profileService->profileFollower($user);
         $profileFeed = $this->profileService->followingPosts($request, $user);
+        $photos = $this->profileService->photos($user);
         return Inertia::render('Profile/View', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
@@ -35,6 +37,7 @@ class ProfileController extends Controller
             'posts' => $profileFeed['posts'],
             'followers' => UserResource::collection($profileFeed['followers']),
             'followings' => UserResource::collection($profileFeed['followings']),
+            'photos' => PostAttachmentResource::collection($photos)
         ]);
     }
 

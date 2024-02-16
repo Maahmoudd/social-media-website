@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Http\Resources\PostResource;
 use App\Models\Follower;
 use App\Models\Post;
+use App\Models\PostAttachment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -87,5 +88,14 @@ class ProfileService
         $followings = $user->followings;
 
         return compact('posts', 'followers', 'followings');
+    }
+
+    public function photos($user)
+    {
+        return PostAttachment::query()
+            ->where('mime', 'like', 'image/%')
+            ->where('created_by', $user->id)
+            ->latest()
+            ->get();
     }
 }
